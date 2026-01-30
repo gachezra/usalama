@@ -40,7 +40,7 @@ class Document(Base):
     doc_type: Mapped[str] = mapped_column(
         String(50),
         nullable=False,
-        comment="e.g., BoQ, Invoice, Contract, Photo",
+        comment="e.g., BoQ, Invoice, Contract, Delivery Note, Photo"
     )
     uploaded_at: Mapped[datetime] = mapped_column(
         DateTime,

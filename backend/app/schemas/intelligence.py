@@ -72,21 +72,21 @@ class ClarificationRequest(BaseModel):
     """
     question: str = Field(
         ...,
-        description="The specific question to ask the citizen verifier",
-        examples=["What is the actual road width at GPS coordinates X,Y?"]
+        description="A direct COMMAND to the citizen. MUST start with 'Take a photo of...', 'Photograph the...', or 'Record video of...'. Never ask written questions.",
+        examples=["Take a photo of the cement bag label showing the brand name", "Photograph the road surface showing the material type"]
     )
     context: str = Field(
         ...,
-        description="Why this information is needed for the audit"
+        description="Why this evidence is needed (e.g., 'To verify the cement brand matches the BoQ specification')"
     )
     data_point_needed: str = Field(
         ...,
-        description="The specific data point required",
-        examples=["Road Width (meters)", "Cement Brand", "Number of classrooms"]
+        description="The specific object to capture (e.g., 'Cement Bag Label', 'Road Surface Material')",
+        examples=["Cement Bag Label", "Road Surface", "Delivery Receipt Date"]
     )
     priority: Severity = Field(
         default=Severity.MEDIUM,
-        description="How urgently this clarification is needed"
+        description="How urgently this evidence is needed"
     )
 
 

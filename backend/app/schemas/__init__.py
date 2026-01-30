@@ -8,6 +8,13 @@ from app.schemas.intelligence import (
     TenderDocument,
     AuditRequest,
 )
+from app.schemas.project import (
+    ProjectCreate,
+    ProjectResponse,
+    ProjectDetail,
+    DocumentResponse,
+    UploadResponse,
+)
 
 __all__ = [
     "DocumentType",
@@ -17,4 +24,9 @@ __all__ = [
     "ForensicVerdict",
     "TenderDocument",
     "AuditRequest",
+    "ProjectCreate",
+    "ProjectResponse",
+    "ProjectDetail",
+    "DocumentResponse",
+    "UploadResponse",
 ]

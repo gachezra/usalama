@@ -24,6 +24,15 @@ class Settings(BaseSettings):
     # Environment
     environment: str = "development"
 
+    # Ollama Configuration (Data Sovereignty - NO external APIs)
+    ollama_host: str = "http://localhost:11434"
+    ollama_model: str = "llama3.2:3b"
+    ollama_timeout: int = 600  # 10 minutes for complex forensic analysis
+    ollama_temperature: float = 0.1  # Low for forensic precision
+
+    # Prompts Directory
+    prompts_dir: str = "app/prompts"
+
     @property
     def is_development(self) -> bool:
         return self.environment == "development"

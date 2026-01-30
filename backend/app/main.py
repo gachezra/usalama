@@ -4,6 +4,7 @@ from sqlalchemy import text
 
 from app.core.config import get_settings
 from app.db.base import engine
+from app.api.endpoints.projects import router as projects_router
 
 settings = get_settings()
 
@@ -12,6 +13,9 @@ app = FastAPI(
     description="Unified System for Automated Ledger & AI-Monitored Accountability",
     version="0.1.0",
 )
+
+# Include API routers
+app.include_router(projects_router, prefix="/api/v1")
 
 # CORS middleware for frontend integration
 app.add_middleware(

@@ -7,6 +7,7 @@ import { usePathname, useRouter } from "next/navigation"
 import {
   Shield,
   LayoutDashboard,
+  FolderKanban,
   ScanSearch,
   Database,
   Settings,
@@ -14,10 +15,12 @@ import {
   ChevronRight,
   LogOut,
 } from "lucide-react"
+import { Toaster } from "sonner"
 import { cn } from "@/lib/utils"
 
 const navItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Overview" },
+  { href: "/dashboard/projects", icon: FolderKanban, label: "Projects" },
   { href: "/dashboard/scanner", icon: ScanSearch, label: "AI Scanner" },
   { href: "/dashboard/ledger", icon: Database, label: "Ledger" },
   { href: "/dashboard/settings", icon: Settings, label: "Settings" },
@@ -150,6 +153,19 @@ export default function DashboardLayout({
 
       {/* Main Content */}
       <main className="flex-1 overflow-auto">{children}</main>
+
+      {/* Toast notifications */}
+      <Toaster
+        theme="dark"
+        position="bottom-right"
+        toastOptions={{
+          style: {
+            background: "rgba(15, 23, 42, 0.95)",
+            border: "1px solid rgba(71, 85, 105, 0.5)",
+            color: "#e2e8f0",
+          },
+        }}
+      />
     </div>
   )
 }

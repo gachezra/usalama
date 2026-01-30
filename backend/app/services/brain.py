@@ -125,18 +125,18 @@ class ForensicBrain:
             DocumentType enum value
         """
         classification_prompt = """Classify this government document into ONE of these categories:
-- bill_of_quantities (BoQ - lists items, quantities, prices)
-- technical_specifications (specs - describes requirements, standards, materials)
-- legal_contract (agreement between parties)
-- payment_invoice (request for payment)
-- delivery_note (proof of delivery)
-- photo_evidence (description of photos/images)
-- other (anything else)
+          - bill_of_quantities (BoQ - lists items, quantities, prices)
+          - technical_specifications (specs - describes requirements, standards, materials)
+          - legal_contract (agreement between parties)
+          - payment_invoice (request for payment)
+          - delivery_note (proof of delivery)
+          - photo_evidence (description of photos/images)
+          - other (anything else)
 
-Document excerpt (first 2000 chars):
-{text}
+          Document excerpt (first 2000 chars):
+          {text}
 
-Respond with ONLY the category name, nothing else."""
+          Respond with ONLY the category name, nothing else."""
 
         # Run LLM in thread to avoid blocking
         def _classify():
@@ -145,9 +145,25 @@ Respond with ONLY the category name, nothing else."""
             )
             return response.text.strip().lower()
 
-        result = await asyncio.to_thread(_classify)
+        response_text = await asyncio.to_thread(_classify)
+        logger.debug(f"Classification LLM response: {response_text}")
 
-        # Map response to enum
+        # Keyword heuristics - handles chatty LLM responses
+        # e.g., "The document is a bill_of_quantities" -> BOQ
+        if "bill_of_quantities" in response_text or "boq" in response_text:
+            return DocumentType.BOQ
+        elif "technical_specifications" in response_text or "specs" in response_text or "specifications" in response_text:
+            return DocumentType.SPECS
+        elif "legal_contract" in response_text or "contract" in response_text:
+            return DocumentType.CONTRACT
+        elif "payment_invoice" in response_text or "invoice" in response_text:
+            return DocumentType.INVOICE
+        elif "delivery_note" in response_text:
+            return DocumentType.DELIVERY_NOTE
+        elif "photo_evidence" in response_text or "photo" in response_text:
+            return DocumentType.PHOTO_EVIDENCE
+
+        # Fallback to direct mapping (for well-behaved LLM outputs)
         type_mapping = {
             "bill_of_quantities": DocumentType.BOQ,
             "boq": DocumentType.BOQ,
@@ -162,7 +178,7 @@ Respond with ONLY the category name, nothing else."""
             "photo_evidence": DocumentType.PHOTO_EVIDENCE,
         }
 
-        return type_mapping.get(result, DocumentType.OTHER)
+        return type_mapping.get(response_text, DocumentType.OTHER)
 
     async def audit_tender_package(
         self,
@@ -199,7 +215,12 @@ Respond with ONLY the category name, nothing else."""
 
             if doc_type not in classified_docs:
                 classified_docs[doc_type] = []
-            classified_docs[doc_type].append(doc.content)
+            # Preserve filename for source tracking
+            doc_info = {
+                "content": doc.content,
+                "filename": doc.filename or f"document_{len(classified_docs[doc_type])+1}"
+            }
+            classified_docs[doc_type].append(doc_info)
 
         logger.info(f"Classified documents: {list(classified_docs.keys())}")
 
@@ -218,24 +239,28 @@ Respond with ONLY the category name, nothing else."""
 
     def _build_analysis_context(
         self,
-        classified_docs: dict[DocumentType, List[str]]
+        classified_docs: dict[DocumentType, List[dict]]
     ) -> str:
-        """Build the analysis context from classified documents."""
+        """Build the analysis context from classified documents with source tags."""
         context_parts = []
 
-        for doc_type, contents in classified_docs.items():
+        for doc_type, doc_infos in classified_docs.items():
             context_parts.append(f"\n{'='*50}")
             context_parts.append(f"DOCUMENT TYPE: {doc_type.value.upper()}")
             context_parts.append(f"{'='*50}")
-            for i, content in enumerate(contents, 1):
-                # Use 50,000 char limit to leverage Llama 3.1's 128k context
+            for doc_info in doc_infos:
+                content = doc_info["content"]
+                filename = doc_info["filename"]
+
+                # Truncate if needed
                 truncated = content[:MAX_DOCUMENT_CHARS] if len(content) > MAX_DOCUMENT_CHARS else content
                 if len(content) > MAX_DOCUMENT_CHARS:
-                    logger.warning(
-                        f"Document {i} of type {doc_type.value} truncated from "
-                        f"{len(content)} to {MAX_DOCUMENT_CHARS} chars"
-                    )
-                context_parts.append(f"\n--- Document {i} ---\n{truncated}")
+                    logger.warning(f"Document {filename} truncated to {MAX_DOCUMENT_CHARS} chars")
+
+                # Add clear source markers for LLM to reference
+                context_parts.append(f"\n[SOURCE: {filename}]")
+                context_parts.append(truncated)
+                context_parts.append(f"[/SOURCE: {filename}]")
 
         return "\n".join(context_parts)
 
@@ -333,18 +358,25 @@ RESPOND IN THIS EXACT JSON FORMAT (no markdown, no extra text):
             "rule_broken": "<specific rule violated>",
             "severity": "<LOW|MEDIUM|HIGH|CRITICAL>",
             "evidence": "<exact quote from documents>",
-            "legal_implication": "<procurement law reference or null>"
+            "legal_implication": "<procurement law reference or null>",
+            "document_sources": ["<filename from [SOURCE: X] tag>"]
         }}
     ],
     "clarifications_needed": [
         {{
-            "question": "<specific question for citizen verifier>",
-            "context": "<why this information is needed>",
-            "data_point_needed": "<e.g., Road Width, Cement Brand>"
+            "question": "<COMMAND starting with: 'Take a photo of...', 'Photograph the...', or 'Record video of...'>",
+            "context": "<why this evidence is needed>",
+            "data_point_needed": "<specific object to capture, e.g., 'Cement Bag Label'>"
         }}
     ],
     "executive_summary": "<2-3 sentence summary of findings>"
-}}"""
+}}
+
+CRITICAL RULES:
+- For 'evidence', cite the SOURCE filename in brackets, e.g., "Price: 5M [SOURCE: invoice.pdf]"
+- For 'document_sources', list all filenames from [SOURCE: X] tags that you quoted
+- For 'question', ALWAYS start with an action verb: "Take a photo of...", "Photograph the...", "Record video of..."
+- Do NOT ask written questions. Citizens capture photo/video PROOF only."""
 
         def _analyze():
             messages = [
@@ -400,10 +432,18 @@ RESPOND IN THIS EXACT JSON FORMAT (no markdown, no extra text):
             logger.error(f"Extracted JSON string (first 500 chars): {json_str[:500]}")
             raise e
 
-        # Build flags
+        # Build flags with robust type checking
         flags = []
         for flag_data in data.get("flags", []):
             try:
+                # Handle malformed data from LLM
+                if isinstance(flag_data, str):
+                    logger.warning(f"⚠️ Skipping string flag: {flag_data[:100]}")
+                    continue
+                if not isinstance(flag_data, dict):
+                    logger.warning(f"⚠️ Skipping non-dict flag: {type(flag_data).__name__}")
+                    continue
+
                 # Handle severity as string or enum
                 severity_val = flag_data.get("severity", "MEDIUM")
                 if isinstance(severity_val, str):
@@ -419,19 +459,27 @@ RESPOND IN THIS EXACT JSON FORMAT (no markdown, no extra text):
                     document_sources=flag_data.get("document_sources", [])
                 ))
             except Exception as e:
-                logger.warning(f"Failed to parse flag: {e}")
+                logger.warning(f"Failed to parse flag: {e} - Data: {str(flag_data)[:200]}")
 
-        # Build clarifications
+        # Build clarifications with robust type checking
         clarifications = []
         for clar_data in data.get("clarifications_needed", []):
             try:
+                # Handle malformed data from LLM
+                if isinstance(clar_data, str):
+                    logger.warning(f"⚠️ Skipping string clarification: {clar_data[:100]}")
+                    continue
+                if not isinstance(clar_data, dict):
+                    logger.warning(f"⚠️ Skipping non-dict clarification: {type(clar_data).__name__}")
+                    continue
+
                 clarifications.append(ClarificationRequest(
                     question=clar_data.get("question", "Clarification needed"),
                     context=clar_data.get("context", "Additional information required"),
                     data_point_needed=clar_data.get("data_point_needed", "Unspecified"),
                 ))
             except Exception as e:
-                logger.warning(f"Failed to parse clarification: {e}")
+                logger.warning(f"Failed to parse clarification: {e} - Data: {str(clar_data)[:200]}")
 
         # Ensure executive summary meets minimum length
         summary = data.get("executive_summary", "Analysis complete. Review flags and clarifications.")
