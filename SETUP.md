@@ -71,6 +71,11 @@ Ensure you have the model downloaded:
 ```Bash
 ollama pull llama3.2:3b
 ```
+Once it is done downloading, run:
+```bash
+ollama serve &
+```
+This will start the LLM if you want to run a quick audit or classification test on the dashboard.
 
 ### Testing
 Access the dashboard at http://localhost:3000/dashboard/login
