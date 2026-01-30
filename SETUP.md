@@ -17,30 +17,46 @@ Welcome to the National Integrity & Oversight Engine. Follow these steps to get 
 docker compose up -d
 ```
 ### 2. Activate the intelligence Engine (Backend)
-
+```bash
 cd backend
+```
 
-# Create virtual env
+### Create virtual env
+```bash
 python -m venv venv
+```
 
-# Activate it
-# Windows:
+## Activate it
+### Windows:
+```bash
 venv\Scripts\activate
-# Mac/Linux:
+```
+### Mac/Linux:
+```bash
 source venv/bin/activate
+```
 
-# Install dependencies
+### Install dependencies
+```bash
 pip install -r requirements.txt
+```
 
-# Configure Secrets
+### Configure Secrets
+```bash
 cp .env.example .env
-# (No need to edit .env if you are using the default Docker setup)
+```
 
-# Run Database Migrations
+### (No need to edit .env if you are using the default Docker setup)
+
+### Run Database Migrations
+```bash
 alembic upgrade head
+```
 
-# Start the Brain
+### Start the Brain
+```bash
 uvicorn app.main:app --reload
+```
 
 ### 3. Launch the Command Center (Frontend)
 Open a new terminal
