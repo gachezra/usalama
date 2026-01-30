@@ -46,7 +46,7 @@ pip install -r requirements.txt
 cp .env.example .env
 ```
 
-### (No need to edit .env if you are using the default Docker setup)
+(No need to edit .env if you are using the default Docker setup)
 
 ### Run Database Migrations
 ```bash
