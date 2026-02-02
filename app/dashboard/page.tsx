@@ -1,38 +1,12 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import dynamic from "next/dynamic"
-import { Activity, Shield, Users, AlertTriangle, CheckCircle, Map } from "lucide-react"
+import { Activity, Shield, Users, AlertTriangle, CheckCircle } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { KenyaMap } from "@/components/dashboard/kenya-map"
 import { LiveFeed } from "@/components/dashboard/live-feed"
 import { StatsCard } from "@/components/dashboard/stats-card"
-import { fetchProjects } from "@/lib/api"
-import type { Project } from "@/lib/types"
-
-const ProjectMap = dynamic(
-  () => import("@/components/dashboard/project-map"),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="h-full bg-slate-800/50 rounded-lg animate-pulse flex items-center justify-center border border-slate-700/50">
-        <div className="text-center">
-          <Map className="w-8 h-8 text-slate-600 mx-auto mb-2" />
-          <span className="text-slate-500 text-sm">Loading map...</span>
-        </div>
-      </div>
-    ),
-  }
-)
 
 export default function DashboardPage() {
-  const [projects, setProjects] = useState<Project[]>([])
-
-  useEffect(() => {
-    fetchProjects()
-      .then(setProjects)
-      .catch(() => {})
-  }, [])
-
   return (
     <div className="p-6 space-y-6">
       {/* Top Bar */}
@@ -73,7 +47,7 @@ export default function DashboardPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="h-[calc(100%-60px)]">
-              <ProjectMap projects={projects} />
+              <KenyaMap />
             </CardContent>
           </Card>
         </div>

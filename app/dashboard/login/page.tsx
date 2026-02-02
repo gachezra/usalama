@@ -28,7 +28,7 @@ export default function AdminLoginPage() {
     if (username === VALID_USER && password === VALID_PASS) {
       // Store auth in sessionStorage
       sessionStorage.setItem("usalama_auth", "true")
-      router.push("/dashboard/projects")
+      router.push("/dashboard")
     } else {
       setError("Invalid credentials. Access denied.")
       setLoading(false)
