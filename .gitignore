@@ -1,0 +1,32 @@
+*.md
+# Dependencies
+node_modules/
+backend/venv/
+backend/__pycache__/
+*.pyc
+
+# Next.js
+.next/
+out/
+build/
+
+# Environment Variables (CRITICAL SECURITY)
+.env
+.env.local
+backend/.env
+
+# IDEs and Tools
+.vscode/
+.idea/
+.cursor/
+.trae/
+.agents/
+.opencode/
+
+# Database & Docker Data
+postgres_data/
+backend/uploads/
+
+# System
+.DS_Store
+Thumbs.db
