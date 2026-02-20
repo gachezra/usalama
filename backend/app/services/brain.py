@@ -26,7 +26,7 @@ from app.schemas.intelligence import (
 logger = logging.getLogger(__name__)
 
 # Document size limit - Llama 3.1 has 128k context, we use 50k chars per doc
-MAX_DOCUMENT_CHARS = 50_000
+MAX_DOCUMENT_CHARS = 15_000
 
 # Retry configuration for malformed JSON
 MAX_RETRIES = 3
@@ -88,6 +88,7 @@ class ForensicBrain:
             additional_kwargs={
                 "num_ctx": 8192,  # Match context_window for Ollama
                 "num_predict": 4096,  # Allow longer output (doubled from 2048)
+                "keep_alive": "5m",  # Keep model loaded between requests
             },
         )
 
@@ -262,7 +263,17 @@ class ForensicBrain:
                 context_parts.append(truncated)
                 context_parts.append(f"[/SOURCE: {filename}]")
 
-        return "\n".join(context_parts)
+        combined = "\n".join(context_parts)
+
+        # Cap total context to prevent exceeding LLM context window
+        if len(combined) > MAX_DOCUMENT_CHARS:
+            logger.warning(
+                f"Combined context ({len(combined)} chars) exceeds limit, "
+                f"truncating to {MAX_DOCUMENT_CHARS} chars"
+            )
+            combined = combined[:MAX_DOCUMENT_CHARS]
+
+        return combined
 
     async def _run_llm_analysis_with_retry(
         self,
@@ -377,6 +388,8 @@ CRITICAL RULES:
 - For 'document_sources', list all filenames from [SOURCE: X] tags that you quoted
 - For 'question', ALWAYS start with an action verb: "Take a photo of...", "Photograph the...", "Record video of..."
 - Do NOT ask written questions. Citizens capture photo/video PROOF only."""
+
+        print(f"🚀 Sending {len(analysis_context)} chars to LLM...")
 
         def _analyze():
             messages = [

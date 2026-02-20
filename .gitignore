@@ -30,3 +30,4 @@ backend/uploads/
 # System
 .DS_Store
 Thumbs.db
+.claude/
