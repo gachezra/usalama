@@ -58,6 +58,9 @@ export default function LandingPage() {
             <Link href="#impact" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
               Impact
             </Link>
+            <Link href="/docs" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+              Docs
+            </Link>
           </div>
           <div className="flex items-center gap-3">
             <Link href="/dashboard">
