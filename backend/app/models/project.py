@@ -14,6 +14,7 @@ if TYPE_CHECKING:
     from app.models.document import Document
     from app.models.audit_log import AuditLog
     from app.models.verification import Verification
+    from app.models.verification_request import VerificationRequest
 
 
 class Project(Base):
@@ -80,6 +81,11 @@ class Project(Base):
     )
     verifications: Mapped[List["Verification"]] = relationship(
         "Verification",
+        back_populates="project",
+        cascade="all, delete-orphan",
+    )
+    verification_requests: Mapped[List["VerificationRequest"]] = relationship(
+        "VerificationRequest",
         back_populates="project",
         cascade="all, delete-orphan",
     )

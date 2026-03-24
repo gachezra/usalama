@@ -77,6 +77,48 @@ export async function auditProject(projectId: string) {
 }
 
 /**
+ * Dispatch verification requests to field agents for a project
+ */
+export async function dispatchVerification(projectId: string, payload: object = {}): Promise<import("@/lib/types").DispatchBatchResponse> {
+  const response = await fetch(`${API_BASE}/projects/${projectId}/dispatch`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  })
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}))
+    throw new Error(err.detail || `Failed to dispatch verification: ${response.statusText}`)
+  }
+  return response.json()
+}
+
+/**
+ * Fetch a verification task by ID (for citizen UI)
+ */
+export async function fetchVerificationTask(requestId: string): Promise<import("@/lib/types").DispatchTask> {
+  const response = await fetch(`${API_BASE}/verifications/${requestId}`)
+  if (!response.ok) {
+    throw new Error(`Failed to fetch verification task: ${response.statusText}`)
+  }
+  return response.json()
+}
+
+/**
+ * Submit citizen verification evidence (photo + GPS)
+ */
+export async function submitVerificationEvidence(requestId: string, formData: FormData): Promise<import("@/lib/types").VerificationResponse> {
+  const response = await fetch(`${API_BASE}/verifications/${requestId}/submit`, {
+    method: "POST",
+    body: formData,
+  })
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}))
+    throw new Error(err.detail || `Failed to submit verification: ${response.statusText}`)
+  }
+  return response.json()
+}
+
+/**
  * Format amount as Kenyan Shillings
  * @example formatKES(15000000) => "KES 15,000,000"
  */

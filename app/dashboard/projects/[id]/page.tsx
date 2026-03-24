@@ -462,7 +462,7 @@ export default function ProjectDetailPage() {
               ) : (
                 <div className="space-y-4">
                   {verdict.clarifications_needed.map((req, idx) => (
-                    <VerificationCard key={idx} request={req} index={idx} />
+                    <VerificationCard key={idx} request={req} index={idx} projectId={params.id as string} />
                   ))}
                 </div>
               )}

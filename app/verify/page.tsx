@@ -2,18 +2,49 @@
 
 import type React from "react"
 
-import { useState, useRef } from "react"
-import { Camera, CheckCircle, Loader2, Shield, Smartphone, AlertCircle } from "lucide-react"
+import { useState, useRef, useEffect, Suspense } from "react"
+import { useSearchParams } from "next/navigation"
+import { Camera, CheckCircle, Loader2, Shield, Smartphone, AlertCircle, XCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import { fetchVerificationTask, submitVerificationEvidence } from "@/lib/api"
+import type { DispatchTask } from "@/lib/types"
 
-type VerificationState = "instructions" | "task" | "analyzing" | "success"
+type VerificationState = "loading" | "instructions" | "task" | "analyzing" | "success" | "rejected" | "error"
 
-export default function VerifyPage() {
-  const [state, setState] = useState<VerificationState>("instructions")
+// Pre-filled Narok GPS coordinates for demo
+const DEMO_GPS = { lat: -1.0833, lng: 35.8667 }
+
+function VerifyPageContent() {
+  const searchParams = useSearchParams()
+  const taskId = searchParams.get("task")
+
+  const [state, setState] = useState<VerificationState>("loading")
+  const [task, setTask] = useState<DispatchTask | null>(null)
+  const [errorMessage, setErrorMessage] = useState("")
   const [showMpesaNotification, setShowMpesaNotification] = useState(false)
   const [capturedImage, setCapturedImage] = useState<string | null>(null)
+  const [transactionId, setTransactionId] = useState("")
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Fetch task on mount
+  useEffect(() => {
+    if (!taskId) {
+      setErrorMessage("No task ID provided. Please use the link sent to you.")
+      setState("error")
+      return
+    }
+
+    fetchVerificationTask(taskId)
+      .then((data) => {
+        setTask(data)
+        setState("instructions")
+      })
+      .catch(() => {
+        setErrorMessage("Invalid or expired verification link. Please contact the admin.")
+        setState("error")
+      })
+  }, [taskId])
 
   const handleStartVerification = () => {
     setState("task")
@@ -25,17 +56,43 @@ export default function VerifyPage() {
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
-    if (file) {
-      const reader = new FileReader()
-      reader.onload = async (event) => {
-        setCapturedImage(event.target?.result as string)
-        setState("analyzing")
-        // Simulate analysis
-        await new Promise((resolve) => setTimeout(resolve, 2500))
-        setState("success")
-        setTimeout(() => setShowMpesaNotification(true), 500)
+    if (!file || !taskId) return
+
+    // Show preview
+    const reader = new FileReader()
+    reader.onload = (event) => {
+      setCapturedImage(event.target?.result as string)
+    }
+    reader.readAsDataURL(file)
+
+    setState("analyzing")
+
+    // Build FormData with exact field names matching backend
+    const formData = new FormData()
+    formData.append("file", file)
+    formData.append("latitude", String(DEMO_GPS.lat))
+    formData.append("longitude", String(DEMO_GPS.lng))
+
+    try {
+      const result = await submitVerificationEvidence(taskId, formData)
+
+      if (result.status === "REJECTED" || result.is_off_site) {
+        setState("rejected")
+        return
       }
-      reader.readAsDataURL(file)
+
+      // Generate client-side transaction ID for display
+      const txId = "R" + Array.from(crypto.getRandomValues(new Uint8Array(4)))
+        .map((b) => b.toString(16).padStart(2, "0"))
+        .join("")
+        .toUpperCase()
+      setTransactionId(txId)
+
+      setState("success")
+      setTimeout(() => setShowMpesaNotification(true), 500)
+    } catch (err) {
+      setErrorMessage(err instanceof Error ? err.message : "Submission failed")
+      setState("error")
     }
   }
 
@@ -45,6 +102,52 @@ export default function VerifyPage() {
     setCapturedImage(null)
   }
 
+  // --- Loading State ---
+  if (state === "loading") {
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6">
+        <Loader2 className="w-10 h-10 text-[#43B02A] animate-spin mb-4" />
+        <p className="text-gray-500">Loading verification task...</p>
+      </div>
+    )
+  }
+
+  // --- Error State ---
+  if (state === "error") {
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6">
+        <div className="w-20 h-20 rounded-full bg-red-100 flex items-center justify-center mb-6">
+          <XCircle className="w-10 h-10 text-red-500" />
+        </div>
+        <h1 className="text-xl font-bold text-gray-900 mb-2">Something Went Wrong</h1>
+        <p className="text-gray-500 text-center max-w-md">{errorMessage}</p>
+      </div>
+    )
+  }
+
+  // --- Rejected State (off-site GPS) ---
+  if (state === "rejected") {
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6">
+        <div className="w-20 h-20 rounded-full bg-red-100 flex items-center justify-center mb-6">
+          <XCircle className="w-10 h-10 text-red-500" />
+        </div>
+        <h1 className="text-xl font-bold text-gray-900 mb-2">Verification Rejected</h1>
+        <p className="text-gray-500 text-center max-w-md mb-6">
+          Your GPS location does not match the project site. Please go to the correct location and try again.
+        </p>
+        <Button
+          onClick={handleDone}
+          variant="outline"
+          className="h-12 border-2 border-gray-200 text-gray-700 font-semibold rounded-xl hover:bg-gray-100 bg-transparent"
+        >
+          Try Again
+        </Button>
+      </div>
+    )
+  }
+
+  // --- Instructions State ---
   if (state === "instructions") {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -115,14 +218,15 @@ export default function VerifyPage() {
             onClick={handleStartVerification}
             className="w-full max-w-md h-14 bg-[#43B02A] hover:bg-[#3a9a24] text-white text-lg font-semibold rounded-xl"
           >
-            I Understand, Let's Start
+            I Understand, Let&apos;s Start
           </Button>
         </div>
       </div>
     )
   }
 
-  if (state === "task") {
+  // --- Task State ---
+  if (state === "task" && task) {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col">
         {/* Header */}
@@ -138,22 +242,10 @@ export default function VerifyPage() {
           <div className="bg-white rounded-xl border border-gray-200 overflow-hidden mb-4">
             <div className="p-4 border-b border-gray-100">
               <p className="text-sm text-gray-500 mb-1">Your Task</p>
-              <h1 className="text-xl font-bold text-gray-900">Verify: Moi Avenue Road Construction</h1>
+              <h1 className="text-xl font-bold text-gray-900">{task.question}</h1>
               <div className="flex items-center gap-2 mt-2">
                 <div className="w-2 h-2 bg-[#43B02A] rounded-full" />
-                <span className="text-sm text-gray-600">Moi Avenue, Nairobi</span>
-              </div>
-            </div>
-
-            {/* Reference Image */}
-            <div className="p-4">
-              <p className="text-sm font-medium text-gray-700 mb-2">Reference: What it should look like</p>
-              <div className="relative rounded-lg overflow-hidden">
-                <img
-                  src="/completed-paved-road-in-kenya-with-fresh-tarmac.jpg"
-                  alt="Reference: Completed Road"
-                  className="w-full h-48 object-cover"
-                />
+                <span className="text-sm text-gray-600">{task.context || "Field verification required"}</span>
               </div>
             </div>
           </div>
@@ -162,11 +254,26 @@ export default function VerifyPage() {
           <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-4">
             <h3 className="font-semibold text-amber-800 mb-2">Photo Instructions:</h3>
             <ul className="text-sm text-amber-700 space-y-1">
-              <li>• Stand at the same spot as the reference image</li>
-              <li>• Make sure the road is clearly visible</li>
+              <li>• {task.data_point_needed}</li>
               <li>• Take the photo during daylight</li>
+              <li>• Make sure the subject is clearly visible</li>
               <li>• Avoid blurry photos</li>
             </ul>
+          </div>
+
+          {/* Priority badge */}
+          <div className="text-center mb-4">
+            <span className={cn(
+              "inline-block font-semibold px-4 py-2 rounded-full text-sm",
+              task.priority === "CRITICAL" ? "bg-red-100 text-red-700" :
+              task.priority === "HIGH" ? "bg-orange-100 text-orange-700" :
+              "bg-[#43B02A]/10 text-[#43B02A]"
+            )}>
+              {task.priority === "CRITICAL" || task.priority === "HIGH"
+                ? `${task.priority} PRIORITY — Earn KSH 50`
+                : "Earn KSH 50 for this verification"
+              }
+            </span>
           </div>
 
           {/* Hidden file input for camera */}
@@ -178,17 +285,9 @@ export default function VerifyPage() {
             onChange={handleFileChange}
             className="hidden"
             onClick={(e) => {
-              // Reset value to allow re-capture
-              ;(e.target as HTMLInputElement).value = ""
+              (e.target as HTMLInputElement).value = ""
             }}
           />
-
-          {/* Reward Badge */}
-          <div className="text-center mb-4">
-            <span className="inline-block bg-[#43B02A]/10 text-[#43B02A] font-semibold px-4 py-2 rounded-full text-sm">
-              Earn KSH 50 for this verification
-            </span>
-          </div>
         </div>
 
         {/* Bottom Action */}
@@ -205,6 +304,7 @@ export default function VerifyPage() {
     )
   }
 
+  // --- Analyzing State ---
   if (state === "analyzing") {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6">
@@ -219,7 +319,7 @@ export default function VerifyPage() {
         {capturedImage && (
           <div className="mt-6 w-full max-w-sm">
             <img
-              src={capturedImage || "/placeholder.svg"}
+              src={capturedImage}
               alt="Captured"
               className="w-full h-48 object-cover rounded-xl border border-gray-200"
             />
@@ -229,6 +329,7 @@ export default function VerifyPage() {
     )
   }
 
+  // --- Success State ---
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6">
       {/* Success Icon */}
@@ -257,7 +358,7 @@ export default function VerifyPage() {
             Confirmed. <span className="font-bold">Ksh 50.00</span> sent to your M-Pesa from{" "}
             <span className="font-bold">USALAMA</span>
           </p>
-          <p className="text-gray-500 text-sm mt-2">Transaction ID: QH82K3NM9P</p>
+          <p className="text-gray-500 text-sm mt-2">Transaction ID: {transactionId}</p>
         </div>
       </div>
 
@@ -272,5 +373,20 @@ export default function VerifyPage() {
         </Button>
       </div>
     </div>
+  )
+}
+
+export default function VerifyPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6">
+          <Loader2 className="w-10 h-10 text-[#43B02A] animate-spin mb-4" />
+          <p className="text-gray-500">Loading...</p>
+        </div>
+      }
+    >
+      <VerifyPageContent />
+    </Suspense>
   )
 }

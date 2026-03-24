@@ -53,6 +53,52 @@ export interface ClarificationRequest {
 }
 
 /**
+ * Dispatched verification task (mirrors backend DispatchResponse)
+ */
+export interface DispatchTask {
+  id: string
+  project_id: string
+  audit_log_id: string
+  citizen_id: string | null
+  question: string
+  context: string
+  data_point_needed: string
+  priority: string
+  gps_target_lat: number | null
+  gps_target_lng: number | null
+  radius_meters: number
+  status: string
+  assigned_at: string | null
+  deadline: string | null
+  created_at: string
+}
+
+/**
+ * Batch dispatch response from backend
+ */
+export interface DispatchBatchResponse {
+  dispatched: number
+  tasks: DispatchTask[]
+}
+
+/**
+ * Citizen verification submission response
+ */
+export interface VerificationResponse {
+  id: string
+  project_id: string
+  citizen_id: string | null
+  request_id: string | null
+  gps_lat: number
+  gps_lng: number
+  photo_url: string
+  photo_hash: string | null
+  is_off_site: boolean
+  status: string
+  submitted_at: string
+}
+
+/**
  * Full forensic verdict from AI analysis
  */
 export interface ForensicVerdict {

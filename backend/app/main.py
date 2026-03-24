@@ -5,6 +5,7 @@ from sqlalchemy import text
 from app.core.config import get_settings
 from app.db.base import engine
 from app.api.endpoints.projects import router as projects_router
+from app.api.endpoints.dispatch import router as dispatch_router
 
 settings = get_settings()
 
@@ -16,6 +17,7 @@ app = FastAPI(
 
 # Include API routers
 app.include_router(projects_router, prefix="/api/v1")
+app.include_router(dispatch_router, prefix="/api/v1")
 
 # CORS middleware for frontend integration
 app.add_middleware(

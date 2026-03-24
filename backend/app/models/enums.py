@@ -32,3 +32,25 @@ class VerificationStatus(str, enum.Enum):
     PENDING = "PENDING"
     VERIFIED = "VERIFIED"
     REJECTED = "REJECTED"
+
+
+class DispatchStatus(str, enum.Enum):
+    """
+    Verification dispatch task lifecycle.
+    Tracks progress from AI-generated request to citizen completion.
+    """
+    PENDING_ASSIGNMENT = "PENDING_ASSIGNMENT"
+    ASSIGNED = "ASSIGNED"
+    IN_PROGRESS = "IN_PROGRESS"
+    COMPLETED = "COMPLETED"
+    EXPIRED = "EXPIRED"
+    CANCELLED = "CANCELLED"
+
+
+class FeedbackVerdict(str, enum.Enum):
+    """
+    Admin review verdict on citizen-submitted verification evidence.
+    """
+    CONFIRMED = "CONFIRMED"
+    REJECTED = "REJECTED"
+    INCONCLUSIVE = "INCONCLUSIVE"

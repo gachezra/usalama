@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime
-from typing import TYPE_CHECKING, Any
+from typing import List, TYPE_CHECKING, Any
 
 from sqlalchemy import DateTime, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID, JSONB
@@ -10,6 +10,7 @@ from app.db.base import Base
 
 if TYPE_CHECKING:
     from app.models.project import Project
+    from app.models.verification_request import VerificationRequest
 
 
 class AuditLog(Base):
@@ -48,3 +49,7 @@ class AuditLog(Base):
 
     # Relationships
     project: Mapped["Project"] = relationship("Project", back_populates="audit_logs")
+    verification_requests: Mapped[List["VerificationRequest"]] = relationship(
+        "VerificationRequest",
+        back_populates="audit_log",
+    )

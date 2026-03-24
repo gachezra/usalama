@@ -15,6 +15,18 @@ from app.schemas.project import (
     DocumentResponse,
     UploadResponse,
 )
+from app.schemas.dispatch import (
+    CitizenCreate,
+    CitizenResponse,
+    LeaderboardEntry,
+    DispatchCreate,
+    DispatchResponse,
+    DispatchBatchResponse,
+    VerificationSubmit,
+    VerificationResponse,
+    FeedbackCreate,
+    FeedbackResponse,
+)
 
 __all__ = [
     "DocumentType",
@@ -29,4 +41,14 @@ __all__ = [
     "ProjectDetail",
     "DocumentResponse",
     "UploadResponse",
+    "CitizenCreate",
+    "CitizenResponse",
+    "LeaderboardEntry",
+    "DispatchCreate",
+    "DispatchResponse",
+    "DispatchBatchResponse",
+    "VerificationSubmit",
+    "VerificationResponse",
+    "FeedbackCreate",
+    "FeedbackResponse",
 ]

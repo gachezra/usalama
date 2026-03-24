@@ -1,35 +1,44 @@
 "use client"
 
 import { useState } from "react"
-import { Camera, Send, Check, Loader2 } from "lucide-react"
+import { Camera, Send, Check, Loader2, Link2, ExternalLink, Copy } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { RiskBadge } from "@/components/dashboard/risk-badge"
-import type { ClarificationRequest } from "@/lib/types"
+import { dispatchVerification } from "@/lib/api"
+import type { ClarificationRequest, DispatchTask } from "@/lib/types"
 import { toast } from "sonner"
 
 interface VerificationCardProps {
   request: ClarificationRequest
   index: number
+  projectId: string
 }
 
 type DispatchState = "idle" | "sending" | "sent"
 
-export function VerificationCard({ request, index }: VerificationCardProps) {
+export function VerificationCard({ request, index, projectId }: VerificationCardProps) {
   const [dispatchState, setDispatchState] = useState<DispatchState>("idle")
+  const [dispatchedTasks, setDispatchedTasks] = useState<DispatchTask[]>([])
 
   const handleDispatch = async () => {
     setDispatchState("sending")
+    try {
+      const result = await dispatchVerification(projectId, {})
+      setDispatchState("sent")
+      setDispatchedTasks(result.tasks)
+      toast.success(`${result.dispatched} verification request${result.dispatched !== 1 ? "s" : ""} dispatched`, {
+        description: "Field agents alerted via USSD",
+      })
+    } catch (err) {
+      setDispatchState("idle")
+      toast.error(err instanceof Error ? err.message : "Dispatch failed")
+    }
+  }
 
-    // Simulate USSD dispatch (2 second delay)
-    await new Promise((resolve) => setTimeout(resolve, 2000))
-
-    // Generate random citizen ID for demo
-    const citizenId = Math.floor(1000 + Math.random() * 9000)
-
-    setDispatchState("sent")
-    toast.success(`Citizen #${citizenId} alerted`, {
-      description: "Verification request dispatched via USSD",
-    })
+  const handleCopyLink = (taskId: string) => {
+    const link = `${window.location.origin}/verify?task=${taskId}`
+    navigator.clipboard.writeText(link)
+    toast.success("Link copied to clipboard")
   }
 
   return (
@@ -85,6 +94,42 @@ export function VerificationCard({ request, index }: VerificationCardProps) {
           )}
         </Button>
       </div>
+
+      {/* Dispatched task links */}
+      {dispatchedTasks.length > 0 && (
+        <div className="mt-4 space-y-2">
+          <div className="flex items-center gap-2 text-xs text-slate-400">
+            <Link2 className="w-3 h-3" />
+            <span>Citizen Verification Links:</span>
+          </div>
+          {dispatchedTasks.map((task) => (
+            <div
+              key={task.id}
+              className="flex items-center gap-2 p-2 rounded bg-slate-900/50 border border-slate-700/30"
+            >
+              <span className="text-xs text-slate-300 truncate flex-1 font-mono">
+                /verify?task={task.id.slice(0, 8)}...
+              </span>
+              <button
+                onClick={() => handleCopyLink(task.id)}
+                className="p-1.5 rounded hover:bg-slate-700/50 text-slate-400 hover:text-cyan-400 transition-colors"
+                title="Copy link"
+              >
+                <Copy className="w-3.5 h-3.5" />
+              </button>
+              <a
+                href={`/verify?task=${task.id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-1.5 rounded hover:bg-slate-700/50 text-slate-400 hover:text-emerald-400 transition-colors"
+                title="Open citizen view"
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
