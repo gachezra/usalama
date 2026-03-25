@@ -1,40 +1,51 @@
 @import "tailwindcss";
-@import "tw-animate-css";
-@import "leaflet/dist/leaflet.css";
 
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: oklch(0.995 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.145 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.965 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.965 0 0);
-  --muted-foreground: oklch(0.45 0 0);
-  --accent: oklch(0.55 0.15 145);
-  --accent-foreground: oklch(1 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.577 0.245 27.325);
-  --border: oklch(0.915 0 0);
-  --input: oklch(0.915 0 0);
-  --ring: oklch(0.708 0 0);
+  /* Earthy Savanna Theme for main pages */
+  --background: oklch(0.97 0.01 75); /* Warm Sand (#F9F6F0) */
+  --foreground: oklch(0.25 0.01 40); /* Very Dark Brown / Almost Black */
+  
+  --card: oklch(0.99 0.005 75);
+  --card-foreground: oklch(0.25 0.01 40);
+  
+  --popover: oklch(0.99 0.005 75);
+  --popover-foreground: oklch(0.25 0.01 40);
+  
+  --primary: oklch(0.6 0.15 45); /* Terracotta */
+  --primary-foreground: oklch(0.98 0.01 75);
+  
+  --secondary: oklch(0.4 0.1 140); /* Deep Forest Green */
+  --secondary-foreground: oklch(0.98 0.01 75);
+  
+  --muted: oklch(0.94 0.02 75);
+  --muted-foreground: oklch(0.5 0.02 40);
+  
+  --accent: oklch(0.45 0.15 25); /* Maasai Red */
+  --accent-foreground: oklch(0.98 0.01 75);
+  
+  --destructive: oklch(0.45 0.15 25); /* Maasai Red */
+  --destructive-foreground: oklch(0.98 0.01 75);
+  
+  --border: oklch(0.85 0.02 75); /* Sand border */
+  --input: oklch(0.85 0.02 75);
+  --ring: oklch(0.6 0.15 45); /* Terracotta ring */
+
+  --radius: 0.5rem; 
+
+  /* USALAMA Brand Colors */
+  --usalama-terracotta: #E2725B;
+  --usalama-sand: #F9F6F0;
+  --usalama-green: #294D33;
+  --usalama-red: #A32824;
+
+  /* Restored Dashboard/Admin Variables */
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
-  --radius: 0.625rem;
-
-  /* USALAMA Brand Colors */
-  --usalama-green: #16a34a;
-  --usalama-red: #dc2626;
-  --usalama-black: #0a0a0a;
 
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
@@ -47,30 +58,32 @@
 }
 
 .dark {
-  --background: oklch(0.07 0.01 260);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.1 0.01 260);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.1 0.01 260);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.985 0 0);
-  --primary-foreground: oklch(0.145 0 0);
-  --secondary: oklch(0.2 0.01 260);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.2 0.01 260);
-  --muted-foreground: oklch(0.65 0 0);
-  --accent: oklch(0.7 0.15 190);
-  --accent-foreground: oklch(0.1 0 0);
+  --background: oklch(0.18 0.01 40); 
+  --foreground: oklch(0.95 0.01 75);
+  --card: oklch(0.2 0.01 40);
+  --card-foreground: oklch(0.95 0.01 75);
+  --popover: oklch(0.2 0.01 40);
+  --popover-foreground: oklch(0.95 0.01 75);
+  --primary: oklch(0.65 0.15 45); 
+  --primary-foreground: oklch(0.18 0.01 40);
+  --secondary: oklch(0.4 0.1 140);
+  --secondary-foreground: oklch(0.95 0.01 75);
+  --muted: oklch(0.25 0.01 40);
+  --muted-foreground: oklch(0.7 0.02 75);
+  --accent: oklch(0.55 0.15 25);
+  --accent-foreground: oklch(0.95 0.01 75);
   --destructive: oklch(0.5 0.2 25);
   --destructive-foreground: oklch(0.985 0 0);
-  --border: oklch(0.22 0.01 260);
-  --input: oklch(0.22 0.01 260);
-  --ring: oklch(0.5 0.15 190);
+  --border: oklch(0.25 0.01 40);
+  --input: oklch(0.25 0.01 40);
+  --ring: oklch(0.65 0.15 45);
+
   --chart-1: oklch(0.7 0.15 190);
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
+
   --sidebar: oklch(0.12 0.01 260);
   --sidebar-foreground: oklch(0.985 0 0);
   --sidebar-primary: oklch(0.7 0.15 190);
@@ -83,7 +96,9 @@
 
 @theme inline {
   --font-sans: "Inter", "Inter Fallback", sans-serif;
+  --font-serif: var(--font-playfair), "Playfair Display", serif;
   --font-mono: "JetBrains Mono", "JetBrains Mono Fallback", monospace;
+  
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -103,15 +118,18 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+
+  --color-terracotta: var(--usalama-terracotta);
+  --color-sand: var(--usalama-sand);
+  --color-forest: var(--usalama-green);
+  --color-maasai: var(--usalama-red);
+
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
@@ -120,6 +138,11 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 2px);
+  --radius-xl: calc(var(--radius) + 4px);
 }
 
 @layer base {
@@ -127,8 +150,32 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground selection:bg-terracotta/20 selection:text-terracotta;
   }
+}
+
+/* Kenyan Cultural Pattern - subtle background motif */
+.kenyan-pattern {
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 10px,
+    rgba(226, 114, 91, 0.04) 10px,
+    rgba(226, 114, 91, 0.04) 20px
+  );
+}
+
+.kenyan-border {
+  border-bottom: 4px solid;
+  border-image: repeating-linear-gradient(
+    90deg,
+    var(--usalama-red) 0,
+    var(--usalama-red) 20px,
+    var(--usalama-terracotta) 20px,
+    var(--usalama-terracotta) 40px,
+    var(--usalama-green) 40px,
+    var(--usalama-green) 60px
+  ) 4;
 }
 
 /* Scanning beam animation */
@@ -193,4 +240,14 @@
 
 .animate-float {
   animation: float 6s ease-in-out infinite;
+}
+
+/* Refined animations */
+@keyframes dash {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+.animate-dash {
+  animation: dash 2s ease-in-out forwards;
 }

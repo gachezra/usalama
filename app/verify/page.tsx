@@ -3,8 +3,9 @@
 import type React from "react"
 
 import { useState, useRef, useEffect, Suspense } from "react"
+import Image from "next/image"
 import { useSearchParams } from "next/navigation"
-import { Camera, CheckCircle, Loader2, Shield, Smartphone, AlertCircle, XCircle } from "lucide-react"
+import { Camera, CheckCircle, Loader2, Smartphone, AlertCircle, XCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { fetchVerificationTask, submitVerificationEvidence } from "@/lib/api"
@@ -105,8 +106,8 @@ function VerifyPageContent() {
   // --- Loading State ---
   if (state === "loading") {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6">
-        <Loader2 className="w-10 h-10 text-[#43B02A] animate-spin mb-4" />
+      <div className="min-h-screen bg-sand/30 flex flex-col items-center justify-center p-6">
+        <Loader2 className="w-10 h-10 text-forest animate-spin mb-4" />
         <p className="text-gray-500">Loading verification task...</p>
       </div>
     )
@@ -115,9 +116,9 @@ function VerifyPageContent() {
   // --- Error State ---
   if (state === "error") {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6">
-        <div className="w-20 h-20 rounded-full bg-red-100 flex items-center justify-center mb-6">
-          <XCircle className="w-10 h-10 text-red-500" />
+      <div className="min-h-screen bg-sand/30 flex flex-col items-center justify-center p-6">
+        <div className="w-20 h-20 rounded-full bg-maasai/10 flex items-center justify-center mb-6">
+          <XCircle className="w-10 h-10 text-maasai" />
         </div>
         <h1 className="text-xl font-bold text-gray-900 mb-2">Something Went Wrong</h1>
         <p className="text-gray-500 text-center max-w-md">{errorMessage}</p>
@@ -128,9 +129,9 @@ function VerifyPageContent() {
   // --- Rejected State (off-site GPS) ---
   if (state === "rejected") {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6">
-        <div className="w-20 h-20 rounded-full bg-red-100 flex items-center justify-center mb-6">
-          <XCircle className="w-10 h-10 text-red-500" />
+      <div className="min-h-screen bg-sand/30 flex flex-col items-center justify-center p-6">
+        <div className="w-20 h-20 rounded-full bg-maasai/10 flex items-center justify-center mb-6">
+          <XCircle className="w-10 h-10 text-maasai" />
         </div>
         <h1 className="text-xl font-bold text-gray-900 mb-2">Verification Rejected</h1>
         <p className="text-gray-500 text-center max-w-md mb-6">
@@ -150,25 +151,25 @@ function VerifyPageContent() {
   // --- Instructions State ---
   if (state === "instructions") {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col">
+      <div className="min-h-screen bg-sand/30 flex flex-col">
         {/* Header */}
         <div className="bg-white border-b border-gray-200 px-4 py-4">
-          <div className="flex items-center gap-2">
-            <Shield className="w-6 h-6 text-[#43B02A]" />
-            <span className="text-lg font-bold text-gray-900">USALAMA</span>
+          <div className="flex items-center gap-3">
+            <Image src="/logo.png" alt="USALAMA" width={32} height={32} className="object-contain" />
+            <span className="text-lg font-serif font-bold text-gray-900 tracking-widest">USALAMA</span>
           </div>
         </div>
 
         <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
-          <div className="w-20 h-20 rounded-full bg-[#43B02A]/10 flex items-center justify-center mb-6">
-            <Smartphone className="w-10 h-10 text-[#43B02A]" />
+          <div className="w-20 h-20 rounded-full bg-forest/10 flex items-center justify-center mb-6">
+            <Smartphone className="w-10 h-10 text-forest" />
           </div>
 
           <h1 className="text-2xl font-bold text-gray-900 mb-3 text-balance">Project Verification</h1>
 
           <p className="text-gray-600 mb-8 max-w-md">
             You have been selected to verify a government project in your area. Take a photo and earn{" "}
-            <span className="font-bold text-[#43B02A]">KSH 50</span> via M-Pesa.
+            <span className="font-bold text-terracotta">KSH 50</span> via M-Pesa.
           </p>
 
           {/* Instructions Box */}
@@ -179,7 +180,7 @@ function VerifyPageContent() {
             </h2>
             <ul className="space-y-3 text-gray-600 text-sm">
               <li className="flex items-start gap-3">
-                <span className="w-6 h-6 rounded-full bg-[#43B02A] text-white text-xs flex items-center justify-center flex-shrink-0 mt-0.5">
+                <span className="w-6 h-6 rounded-full bg-forest text-white text-xs flex items-center justify-center flex-shrink-0 mt-0.5">
                   1
                 </span>
                 <span>
@@ -188,7 +189,7 @@ function VerifyPageContent() {
                 </span>
               </li>
               <li className="flex items-start gap-3">
-                <span className="w-6 h-6 rounded-full bg-[#43B02A] text-white text-xs flex items-center justify-center flex-shrink-0 mt-0.5">
+                <span className="w-6 h-6 rounded-full bg-forest text-white text-xs flex items-center justify-center flex-shrink-0 mt-0.5">
                   2
                 </span>
                 <span>
@@ -196,7 +197,7 @@ function VerifyPageContent() {
                 </span>
               </li>
               <li className="flex items-start gap-3">
-                <span className="w-6 h-6 rounded-full bg-[#43B02A] text-white text-xs flex items-center justify-center flex-shrink-0 mt-0.5">
+                <span className="w-6 h-6 rounded-full bg-forest text-white text-xs flex items-center justify-center flex-shrink-0 mt-0.5">
                   3
                 </span>
                 <span>
@@ -204,7 +205,7 @@ function VerifyPageContent() {
                 </span>
               </li>
               <li className="flex items-start gap-3">
-                <span className="w-6 h-6 rounded-full bg-[#43B02A] text-white text-xs flex items-center justify-center flex-shrink-0 mt-0.5">
+                <span className="w-6 h-6 rounded-full bg-forest text-white text-xs flex items-center justify-center flex-shrink-0 mt-0.5">
                   4
                 </span>
                 <span>
@@ -216,7 +217,7 @@ function VerifyPageContent() {
 
           <Button
             onClick={handleStartVerification}
-            className="w-full max-w-md h-14 bg-[#43B02A] hover:bg-[#3a9a24] text-white text-lg font-semibold rounded-xl"
+            className="w-full max-w-md h-14 bg-forest hover:bg-forest/90 text-white text-lg font-semibold rounded-xl"
           >
             I Understand, Let&apos;s Start
           </Button>
@@ -228,12 +229,12 @@ function VerifyPageContent() {
   // --- Task State ---
   if (state === "task" && task) {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col">
+      <div className="min-h-screen bg-sand/30 flex flex-col">
         {/* Header */}
         <div className="bg-white border-b border-gray-200 px-4 py-4">
-          <div className="flex items-center gap-2">
-            <Shield className="w-6 h-6 text-[#43B02A]" />
-            <span className="text-lg font-bold text-gray-900">USALAMA</span>
+          <div className="flex items-center gap-3">
+            <Image src="/logo.png" alt="USALAMA" width={32} height={32} className="object-contain" />
+            <span className="text-lg font-serif font-bold text-gray-900 tracking-widest">USALAMA</span>
           </div>
         </div>
 
@@ -244,7 +245,7 @@ function VerifyPageContent() {
               <p className="text-sm text-gray-500 mb-1">Your Task</p>
               <h1 className="text-xl font-bold text-gray-900">{task.question}</h1>
               <div className="flex items-center gap-2 mt-2">
-                <div className="w-2 h-2 bg-[#43B02A] rounded-full" />
+                <div className="w-2 h-2 bg-terracotta rounded-full" />
                 <span className="text-sm text-gray-600">{task.context || "Field verification required"}</span>
               </div>
             </div>
@@ -265,9 +266,9 @@ function VerifyPageContent() {
           <div className="text-center mb-4">
             <span className={cn(
               "inline-block font-semibold px-4 py-2 rounded-full text-sm",
-              task.priority === "CRITICAL" ? "bg-red-100 text-red-700" :
+              task.priority === "CRITICAL" ? "bg-maasai/10 text-maasai" :
               task.priority === "HIGH" ? "bg-orange-100 text-orange-700" :
-              "bg-[#43B02A]/10 text-[#43B02A]"
+              "bg-forest/10 text-forest"
             )}>
               {task.priority === "CRITICAL" || task.priority === "HIGH"
                 ? `${task.priority} PRIORITY — Earn KSH 50`
@@ -294,7 +295,7 @@ function VerifyPageContent() {
         <div className="p-4 bg-white border-t border-gray-200">
           <Button
             onClick={handleTakePhoto}
-            className="w-full h-14 bg-[#43B02A] hover:bg-[#3a9a24] text-white text-lg font-semibold rounded-xl"
+            className="w-full h-14 bg-forest hover:bg-forest/90 text-white text-lg font-semibold rounded-xl"
           >
             <Camera className="w-6 h-6 mr-2" />
             Take Photo Now
@@ -307,10 +308,10 @@ function VerifyPageContent() {
   // --- Analyzing State ---
   if (state === "analyzing") {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6">
+      <div className="min-h-screen bg-sand/30 flex flex-col items-center justify-center p-6">
         <div className="relative mb-6">
-          <div className="w-20 h-20 rounded-full bg-[#43B02A]/10 flex items-center justify-center">
-            <Loader2 className="w-10 h-10 text-[#43B02A] animate-spin" />
+          <div className="w-20 h-20 rounded-full bg-forest/10 flex items-center justify-center">
+            <Loader2 className="w-10 h-10 text-forest animate-spin" />
           </div>
         </div>
         <h2 className="text-xl font-bold text-gray-900 mb-2">Analyzing Photo...</h2>
@@ -331,9 +332,9 @@ function VerifyPageContent() {
 
   // --- Success State ---
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6">
+    <div className="min-h-screen bg-sand/30 flex flex-col items-center justify-center p-6">
       {/* Success Icon */}
-      <div className="w-24 h-24 rounded-full bg-[#43B02A] flex items-center justify-center mb-6">
+      <div className="w-24 h-24 rounded-full bg-forest flex items-center justify-center mb-6">
         <CheckCircle className="w-14 h-14 text-white" />
       </div>
 
@@ -347,9 +348,9 @@ function VerifyPageContent() {
           showMpesaNotification ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4",
         )}
       >
-        <div className="bg-[#43B02A] px-4 py-3 flex items-center gap-2">
+        <div className="bg-forest px-4 py-3 flex items-center gap-2">
           <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
-            <span className="text-[#43B02A] font-bold text-sm">M</span>
+            <span className="text-forest font-bold text-sm">M</span>
           </div>
           <span className="text-white font-semibold">M-PESA</span>
         </div>
@@ -380,8 +381,8 @@ export default function VerifyPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6">
-          <Loader2 className="w-10 h-10 text-[#43B02A] animate-spin mb-4" />
+        <div className="min-h-screen bg-sand/30 flex flex-col items-center justify-center p-6">
+          <Loader2 className="w-10 h-10 text-forest animate-spin mb-4" />
           <p className="text-gray-500">Loading...</p>
         </div>
       }
